@@ -182,9 +182,11 @@ public class App {
                             }
                         } else {
                             System.out.print("Incorrect password.\nPress any key to continue...");
+                            Utility.getch();
                         }
                     } else {
                         System.out.print("User " + username + " not found.\nPress any key to continue...");
+                        Utility.getch();
                     }
                     break;
                 }
@@ -197,7 +199,7 @@ public class App {
                             Utility.loadingDots();
                             while (opt2 != 0) {
                                 Utility.clearConsoleScreen();
-                                System.out.println("Client Portal");
+                                System.out.println("BPO Manager Portal");
                                 System.out.println("1. View your clients\n2. Create new client contract\n3. Terminate a client contract\n4. Add a task\n5. View all tasks\n6. Account Details\n0. Logout");
                                 System.out.print("> ");
                                 opt2 = sc.nextInt();
