@@ -15,13 +15,13 @@ public class Utility {
     public static void loadingDots() {
         for (int i = 0; i < 3; i++) {
             try {
-                Thread.sleep(300);
+                Thread.sleep(200);
             } catch (Exception e) {
                 System.out.println("Internal error: " + e.getMessage());
             }
             System.out.print(".");
             try {
-                Thread.sleep(300);
+                Thread.sleep(200);
             } catch (Exception e) {
                 System.out.println("Internal error: " + e.getMessage());
             }

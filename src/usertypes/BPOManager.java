@@ -29,6 +29,10 @@ public class BPOManager {
         return clients;
     }
 
+    public int getClientCount() {
+        return clients.size();
+    }
+
     public void addClient(String clientUname) {
         clients.add(clientUname);
     }
@@ -36,20 +40,6 @@ public class BPOManager {
     public void removeClient(String clientUname) {
         clients.remove(clientUname);
     }
-
-    // public void assignTask(String clientUname, String task) {
-    //     if (clients.contains(clientUname)) {
-    //         Client.searchClient(clients, clientUname).addTask(task);
-    //     }
-    // }
-
-    // public List<String> viewTasks(String username) {
-    //     Client client = Client.searchClient(clients, username);
-    //     if (client != null) {
-    //         return client.getTasks();
-    //     }
-    //     return null;
-    // }
 
     public static BPOManager searchBpoManager(List<BPOManager> bpoManagers, String uname) {
         for (BPOManager bpoManager : bpoManagers) {

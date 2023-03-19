@@ -29,11 +29,16 @@ public class Client {
         this.bpoManagerUsername = String.valueOf(uname);
     }
 
+    public void removeBpoManagerUsername() {
+        this.bpoManagerUsername = null;
+    }
+
     public boolean checkPassword(String password) {
-        if (this.password.equals(password)) {
-            return true;
-        }
-        return false;
+        return this.password.equals(password);
+    }
+
+    public void setPassword(String pass) {
+        this.password = pass;
     }
 
     public List<String> getTasks() {
@@ -46,6 +51,14 @@ public class Client {
 
     public void addTask(String task) {
         tasks.add(task);
+    }
+
+    public String completeTask(int index) {
+        return tasks.remove(index);
+    }
+
+    public void clearTasks() {
+        tasks.clear();
     }
 
     public static Client searchClient(HashMap<Integer, Client> clients, String uname) {
