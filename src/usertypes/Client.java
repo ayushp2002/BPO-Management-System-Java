@@ -4,12 +4,16 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+/**
+ * It's a class that represents a client
+ */
 public class Client {
     private String username;
     private String password;
     private String bpoManagerUsername;
     private List<String> tasks;
 
+    // It's a constructor.
     public Client(String name, String pass) {
         this.username = name;
         this.password = pass;
@@ -17,14 +21,30 @@ public class Client {
         tasks = new ArrayList<>();
     }
 
+    /**
+     * This function returns the username of the user
+     * 
+     * @return The username
+     */
     public String getUsername() {
         return username;
     }
 
+    /**
+     * This function returns the username of the BPO Manager
+     * 
+     * @return The value of the bpoManagerUsername variable.
+     */
     public String getBpoManagerUsername() {
         return bpoManagerUsername;
     }
 
+    /**
+     * This function sets the value of the bpoManagerUsername variable to the value of the uname
+     * variable
+     * 
+     * @param uname The username of the user who is currently logged in.
+     */
     public void setBpoManagerUsername(String uname) {
         this.bpoManagerUsername = String.valueOf(uname);
     }

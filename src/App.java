@@ -1,7 +1,9 @@
 import java.io.Console;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.InputMismatchException;
 import java.util.List;
+import java.util.Random;
 import java.util.Scanner;
 
 import usertypes.BPOManager;
@@ -12,28 +14,40 @@ public class App {
     private static HashMap<Integer, Client> clients = new HashMap<Integer, Client>();
     private static List<BPOManager> bpoManagers = new ArrayList<BPOManager>();
     private static HashMap<Integer, String> texts = new HashMap<Integer, String>(3); // To use with user input opt
-                                                                                     // number
 
     private static Scanner sc = new Scanner(System.in);
     private static Console con = System.console();
 
+    /**
+     * It registers a new user
+     */
     private static void registerNewUser() {
         int opt = 99;
         String username = new String();
         String password = new String();
         String confirmPass = new String();
 
+        // Taking input
         System.out.println("Register");
         System.out.println("1. Register Client\n2. Register BPO Manager\n3. Forgot Password\n0. Back to main menu");
         System.out.print("> ");
-        opt = sc.nextInt();
-        sc.nextLine(); // consume the newline character
-
+        try {
+            opt = sc.nextInt();
+            sc.nextLine(); // consume the newline character
+        } catch (InputMismatchException e) {    // to prevent the program from terminating if the input is not an integer
+            System.out.print("Invalid input");
+            Utility.loadingDots();
+            sc.next();
+            return;
+        }
+        
+        // Taking the username and password from the user and checking if the password and confirm
+        // password are same.
         if (opt == 1 || opt == 2) {
             Utility.clearConsoleScreen();
             System.out.println(texts.get(opt) + " Register");
             System.out.print("Username: ");
-            username = sc.nextLine();
+            username = sc.nextLine().trim();
             if (username.trim().isEmpty()) {
                 System.out.println("Username cannot be empty.\nPress any key to continue...");
                 Utility.getch();
@@ -41,7 +55,7 @@ public class App {
             }
             System.out.print("[Input will not be visible]\nPassword: ");
             char[] chararr = con.readPassword();
-            password = String.valueOf(chararr);
+            password = String.valueOf(chararr).trim();
             if (password.trim().isEmpty()) {
                 System.out.println("Password cannot be empty.\nPress any key to continue...");
                 Utility.getch();
@@ -49,7 +63,7 @@ public class App {
             }
             System.out.print("Confirm Password: ");
             chararr = con.readPassword();
-            confirmPass = String.valueOf(chararr);
+            confirmPass = String.valueOf(chararr).trim();
             if (!password.equals(confirmPass)) {
                 System.out.print("Password and Confirm password should be same.\nPress Enter to continue...");
                 Utility.getch();
@@ -94,18 +108,45 @@ public class App {
                 Utility.getch();
                 break;
             }
-            case 3: {
+            case 3: {   // Forgot Password
+                // Input from user
                 Utility.clearConsoleScreen();
                 System.out.println("Reset password");
                 System.out.print("Username: ");
                 username = sc.nextLine();
                 System.out.print("Choose user type\n1. Client\n2. BPO Manager\n> ");
-                int ustyp = sc.nextInt();
+                int ustyp;
+                try {
+                    ustyp = sc.nextInt();
+                    sc.nextLine(); // consume the newline character
+                } catch (InputMismatchException e) {
+                    System.out.print("Invalid input");
+                    Utility.loadingDots();
+                    sc.next();
+                    break;
+                }
+                // Validate input
                 if (ustyp != 1 && ustyp != 2) {
                     System.out.println("Invalid choice.Press Enter to continue...");
                     Utility.getch();
                     break;
                 }
+
+                // Checking if the user exists or not.
+                if (ustyp == 1) {
+                    if (Client.searchClient(clients, username) == null) {
+                        System.out.print("Client " + username + " does not exist.\nPress Enter to continue...");
+                        Utility.getch();
+                        break;
+                    }
+                } else if (ustyp == 2) {
+                    if (BPOManager.searchBpoManager(bpoManagers, username) == null) {
+                        System.out.print("BPO Manager " + username + " does not exist.\nPress Enter to continue...");
+                        Utility.getch();
+                        break;
+                    }
+                }
+                // Simulating OTP
                 System.out.print("Sending OTP");
                 Utility.loadingDots();
                 Utility.clearConsoleScreen();
@@ -115,14 +156,55 @@ public class App {
                 Utility.loadingDots();
                 Utility.loadingDots();
                 Utility.clearConsoleScreen();
-                System.out.print();
-                switch (ustyp) {
-                    case 1: {
+                int otp = new Random().nextInt(900000) + 100000;
+                System.out.println("Message Received.\nYour OTP for resetting BPO Management System password is " + otp
+                        + ". Please do not share the OTPs with anyone. Thanks");
+                System.out.print("Press Enter to continue...");
+                Utility.getch();
 
+                // Input OTP
+                Utility.clearConsoleScreen();
+                System.out.println("Reset password");
+                System.out.print("Enter OTP: ");
+                int inOtp;
+                try {
+                    inOtp = sc.nextInt();
+                    sc.nextLine();
+                } catch (InputMismatchException e) {
+                    System.out.print("Invalid input");
+                    Utility.loadingDots();
+                    sc.next();
+                    break;
+                }
+                // Validate OTP
+                if (otp != inOtp) {
+                    System.out.print("Incorrect OTP.\nPress Enter to continue...");
+                    Utility.getch();
+                    break;
+                }
+                // Input new password to reset
+                Utility.clearConsoleScreen();
+                System.out.println("Reset password");
+                System.out.print("New Password: ");
+                char[] passChar = con.readPassword();
+                String newPass = String.valueOf(passChar);
+                if (newPass.trim().isEmpty()) {
+                    System.out.print("Password cannot be empty.\nPress Enter to continue...");
+                    Utility.getch();
+                    break;
+                }
+                // Change the password serching by user type.
+                switch (ustyp) {
+                    case 1: { // Client
+                        Client.searchClient(clients, username).setPassword(newPass);
+                        System.out.print("Password changed");
+                        Utility.loadingDots();
                         break;
                     }
-                    case 2: {
-
+                    case 2: { // BPO Manager
+                        BPOManager.searchBpoManager(bpoManagers, username).setPassword(newPass);
+                        System.out.print("Password changed");
+                        Utility.loadingDots();
                         break;
                     }
                     default:
@@ -140,6 +222,9 @@ public class App {
         }
     }
 
+    /**
+     * Login portal for clients and BPO managers
+     */
     public static void main(String[] args) {
         /***************************************************
          * Data declaration
@@ -154,19 +239,20 @@ public class App {
         texts.put(1, "Client");
         texts.put(2, "BPO Manager");
 
-        clients.put(1, new Client("ayush", "ayush"));
-        clients.put(2, new Client("kumar", "kumar"));
-        clients.put(3, new Client("sage", "sage"));
-        clients.put(4, new Client("omen", "omen"));
+        // default users for testing only
+        // clients.put(1, new Client("ayush", "ayush"));
+        // clients.put(2, new Client("kumar", "kumar"));
+        // clients.put(3, new Client("sage", "sage"));
+        // clients.put(4, new Client("omen", "omen"));
 
-        bpoManagers.add(new BPOManager("breach", "breach"));
-        bpoManagers.add(new BPOManager("fade", "fade"));
-        bpoManagers.add(new BPOManager("viper", "viper"));
+        // bpoManagers.add(new BPOManager("breach", "breach"));
+        // bpoManagers.add(new BPOManager("fade", "fade"));
+        // bpoManagers.add(new BPOManager("viper", "viper"));
 
-        clients.get(1).addTask("Clean the toilets on second floor.");
-        clients.get(1).addTask("BURN the CFO office using all his paper documents");
-        clients.get(1).setBpoManagerUsername("fade");
-        bpoManagers.get(1).addClient("ayush");
+        // clients.get(1).addTask("Clean the toilets on second floor.");
+        // clients.get(1).addTask("BURN the CFO office using all his paper documents");
+        // clients.get(1).setBpoManagerUsername("fade");
+        // bpoManagers.get(1).addClient("ayush");
 
         /***************************************************
          * Execution start
@@ -179,8 +265,15 @@ public class App {
             System.out.println("Login");
             System.out.println("1. Client Login\n2. BPO Manager Login\n3. Register new user\n0. Exit");
             System.out.print("> ");
-            opt = sc.nextInt();
-            sc.nextLine(); // consume the newline character
+            try {
+                opt = sc.nextInt();
+                sc.nextLine(); // consume the newline character
+            } catch (InputMismatchException e) {
+                System.out.print("Invalid input");
+                Utility.loadingDots();
+                sc.next();
+                continue;
+            }
 
             if (opt == 1 || opt == 2) {
                 Utility.clearConsoleScreen();
@@ -214,17 +307,26 @@ public class App {
                                 Utility.clearConsoleScreen();
                                 System.out.println("Client Portal");
                                 if (client.getBpoManagerUsername() != null) {
-                                    System.out
-                                            .println(
-                                                    "1. View Tasks\n2. Complete tasks\n3. Account Settings\n0. Logout");
-                                    System.out.print("> ");
-                                    opt1 = sc.nextInt();
-                                    sc.nextLine();
+                                    System.out.println("1. View Tasks\n2. Complete tasks");
                                 } else {
-                                    System.out.print(
-                                            "[BPO Manager is not assigned yet. Actions will be visible once a BPO Manager is assigned to your user.]\nPress Enter to continue...");
-                                    Utility.getch();
+                                    System.out.println(
+                                            "[BPO Manager is not assigned yet. Actions will be visible once a BPO Manager is assigned to your user.]");
+                                }
+                                System.out.println("3. Account Settings\n0. Logout");
+                                System.out.print("> ");
+                                try {
+                                    opt1 = sc.nextInt();
+                                    sc.nextLine(); // consume the newline character
+                                } catch (InputMismatchException e) {
+                                    System.out.print("Invalid input");
+                                    Utility.loadingDots();
+                                    sc.next();
                                     break;
+                                }
+                                if (client.getBpoManagerUsername() == null && (opt1 == 1 || opt1 == 2)) {
+                                    System.out.print("Chosen actions unavailable");
+                                    Utility.loadingDots();
+                                    continue;
                                 }
 
                                 switch (opt1) {
@@ -254,8 +356,15 @@ public class App {
                                         }
                                         System.out.println("0. Go back to Client Portal");
                                         System.out.print("> ");
-                                        opt2 = sc.nextInt();
-                                        sc.nextLine();
+                                        try {
+                                            opt2 = sc.nextInt();
+                                            sc.nextLine(); // consume the newline character
+                                        } catch (InputMismatchException e) {
+                                            System.out.print("Invalid input");
+                                            Utility.loadingDots();
+                                            sc.next();
+                                            break;
+                                        }
                                         if (opt2 == 0) {
                                             break;
                                         }
@@ -273,16 +382,24 @@ public class App {
                                         Utility.clearConsoleScreen();
                                         System.out.println("Client user account");
                                         System.out.println("Username: " + client.getUsername() + "\nBPO Manager: "
-                                                + client.getBpoManagerUsername() + "\nPending Tasks: "
+                                                + (client.getBpoManagerUsername()==null ? "" : client.getBpoManagerUsername()) + "\nPending Tasks: "
                                                 + client.getTasksCount());
                                         System.out.println(
                                                 "==============================================================");
-                                        System.out.println("1. Change Password\n2. /!\\ Delete account /!\\\n0. Go back to Client portal");
+                                        System.out.println(
+                                                "1. Change Password\n2. /!\\ Delete account /!\\\n0. Go back to Client portal");
                                         System.out.print("> ");
-                                        opt2 = sc.nextInt();
-                                        sc.nextLine();
+                                        try {
+                                            opt2 = sc.nextInt();
+                                            sc.nextLine(); // consume the newline character
+                                        } catch (InputMismatchException e) {
+                                            System.out.print("Invalid input");
+                                            Utility.loadingDots();
+                                            sc.next();
+                                            break;
+                                        }
                                         switch (opt2) {
-                                            case 1: {   // Change Password
+                                            case 1: { // Change Password
                                                 Utility.clearConsoleScreen();
                                                 System.out.println("Change Password");
                                                 System.out.print("Old Password: ");
@@ -293,47 +410,58 @@ public class App {
                                                 String newPass = String.valueOf(passChar);
                                                 if (client.checkPassword(oldPass)) {
                                                     if (client.checkPassword(newPass)) {
-                                                        System.out.print("Choose a password different from the old password.\nPress Enter to continue...");
+                                                        System.out.print(
+                                                                "Choose a password different from the old password.\nPress Enter to continue...");
                                                         Utility.getch();
                                                     }
                                                     client.setPassword(newPass);
                                                     System.out.print("New password set");
                                                     Utility.loadingDots();
                                                 } else {
-                                                    System.out.print("Old password incorrect.\nPress Enter to continue...");
+                                                    System.out.print(
+                                                            "Old password incorrect.\nPress Enter to continue...");
                                                     Utility.getch();
                                                 }
                                                 break;
                                             }
-                                            case 2: {   // Delete Account
+                                            case 2: { // Delete Account
                                                 if (client.getBpoManagerUsername() != null) {
-                                                    System.out.print("Contract termination required before deleting account.\nAsk current BPO Manager " + client.getBpoManagerUsername() + " to terminate contract.\nPress Enter to continue...");
+                                                    System.out.print(
+                                                            "Contract termination required before deleting account.\nAsk current BPO Manager "
+                                                                    + client.getBpoManagerUsername()
+                                                                    + " to terminate contract.\nPress Enter to continue...");
                                                     Utility.getch();
                                                     break;
                                                 }
                                                 System.out.print("This action is irreversible.\n" +
-                                                    "You will have to create a new account.\n" +
-                                                    "BPO Manager mapping will be deleted.\n" +
-                                                    "All tasks will be deleted\n" +
-                                                    "Are you sure you want to delete the account?[Y/N]: ");
+                                                        "You will have to create a new account.\n" +
+                                                        "BPO Manager mapping will be deleted.\n" +
+                                                        "All tasks will be deleted\n" +
+                                                        "Are you sure you want to delete the account?[Y/N]: ");
                                                 char ans = sc.next().charAt(0);
                                                 Character.toLowerCase(ans);
                                                 int indexToDelete = -1;
                                                 if (ans == 'y') {
                                                     for (int i = 0; i < clients.size(); i++) {
-                                                        if (clients.get(i+1).getUsername().equals(client.getUsername())) {
+                                                        if (clients.get(i + 1).getUsername()
+                                                                .equals(client.getUsername())) {
                                                             indexToDelete = i;
                                                             break;
                                                         }
                                                     }
-                                                }
-                                                try {
-                                                    clients.remove(indexToDelete);
-                                                    System.out.print("User has been deleted.Exiting application");
+                                                    try {
+                                                        clients.remove(indexToDelete);
+                                                        System.out.print("User has been deleted.Exiting application");
+                                                        Utility.loadingDots();
+                                                        return;
+                                                    } catch (IndexOutOfBoundsException e) {
+                                                        System.out
+                                                                .println("Something went wrong. Couldn't delete account.");
+                                                    }
+                                                } else {
+                                                    System.out.print("Deletion cancelled");
                                                     Utility.loadingDots();
-                                                    return;
-                                                } catch (IndexOutOfBoundsException e) {
-                                                    System.out.println("Something went wrong. Couldn't delete account.");
+                                                    break;
                                                 }
                                                 break;
                                             }
@@ -352,6 +480,8 @@ public class App {
                                         continue;
                                     }
                                     default:
+                                        System.out.print("Invalid choice.\nPress Enter to continue...");
+                                        Utility.getch();
                                         break;
                                 }
                             }
@@ -378,8 +508,15 @@ public class App {
                                 System.out.println(
                                         "1. View your clients\n2. Create new client contract\n3. Terminate a client contract\n4. Add a task\n5. View all tasks\n6. Account Details\n0. Logout");
                                 System.out.print("> ");
-                                opt2 = sc.nextInt();
-                                sc.nextLine();
+                                try {
+                                    opt2 = sc.nextInt();
+                                    sc.nextLine(); // consume the newline character
+                                } catch (InputMismatchException e) {
+                                    System.out.print("Invalid input");
+                                    Utility.loadingDots();
+                                    sc.next();
+                                    break;
+                                }
 
                                 switch (opt2) {
                                     case 1: { // View your clients
@@ -413,8 +550,15 @@ public class App {
                                         System.out.println("0. Go back to BPO Manager Portal");
                                         System.out.print("> ");
                                         int clientNo = 0;
-                                        clientNo = sc.nextInt();
-                                        sc.nextLine();
+                                        try {
+                                            clientNo = sc.nextInt();
+                                            sc.nextLine(); // consume the newline character
+                                        } catch (InputMismatchException e) {
+                                            System.out.print("Invalid input");
+                                            Utility.loadingDots();
+                                            sc.next();
+                                            break;
+                                        }
                                         if (clientNo == 0) {
                                             break;
                                         }
@@ -447,8 +591,15 @@ public class App {
                                         System.out.println("0. Go back to BPO Manager Portal");
                                         System.out.print("> ");
                                         int clientNo = 0;
-                                        clientNo = sc.nextInt();
-                                        sc.nextLine();
+                                        try {
+                                            clientNo = sc.nextInt();
+                                            sc.nextLine(); // consume the newline character
+                                        } catch (InputMismatchException e) {
+                                            System.out.print("Invalid input");
+                                            Utility.loadingDots();
+                                            sc.next();
+                                            break;
+                                        }
                                         if (clientNo == 0) {
                                             break;
                                         }
@@ -491,8 +642,15 @@ public class App {
                                         System.out.println("0. Go back to BPO Manager Portal");
                                         System.out.print("> ");
                                         int clientNo = 0;
-                                        clientNo = sc.nextInt();
-                                        sc.nextLine();
+                                        try {
+                                            clientNo = sc.nextInt();
+                                            sc.nextLine(); // consume the newline character
+                                        } catch (InputMismatchException e) {
+                                            System.out.print("Invalid input");
+                                            Utility.loadingDots();
+                                            sc.next();
+                                            break;
+                                        }
                                         if (clientNo == 0) {
                                             break;
                                         }
