@@ -275,6 +275,7 @@ public class App {
                 continue;
             }
 
+            // Taking the username and password from the user.
             if (opt == 1 || opt == 2) {
                 Utility.clearConsoleScreen();
                 System.out.println(texts.get(opt) + " Login");
@@ -295,7 +296,7 @@ public class App {
                 }
             }
 
-            switch (opt) {
+            switch (opt) {  // Main menu
                 case 1: { // Client Login
                     Utility.clearConsoleScreen();
                     Client client = Client.searchClient(clients, username);
@@ -323,17 +324,22 @@ public class App {
                                     sc.next();
                                     break;
                                 }
+                                // Checking if the client has a BPO manager username and if the user
+                                // has chosen option 1 or 2. If the client does not have a BPO manager
+                                // username and the user has chosen option 1 or 2, it will print
+                                // "Chosen actions unavailable" and continue.
                                 if (client.getBpoManagerUsername() == null && (opt1 == 1 || opt1 == 2)) {
                                     System.out.print("Chosen actions unavailable");
                                     Utility.loadingDots();
                                     continue;
                                 }
 
-                                switch (opt1) {
+                                switch (opt1) { // Client Portal
                                     case 1: { // View Tasks
                                         Utility.clearConsoleScreen();
                                         System.out.println(client.getTasksCount() + " tasks pending");
                                         List<String> tasks = client.getTasks();
+                                        // Printing out the tasks of a client.
                                         for (int i = 0; i < client.getTasksCount(); i++) {
                                             System.out.println((i + 1) + ". " + tasks.get(i));
                                         }
@@ -345,12 +351,14 @@ public class App {
                                         Utility.clearConsoleScreen();
                                         System.out.println(client.getTasksCount()
                                                 + " tasks pending. Enter task number to mark as complete.");
+                                        // Checking if the client has any pending tasks.
                                         if (client.getTasksCount() <= 0) {
                                             System.out.println("No Pending tasks.\nPress Enter to continue...");
                                             Utility.getch();
                                             break;
                                         }
                                         List<String> tasks = client.getTasks();
+                                        // Printing out the tasks of a client.
                                         for (int i = 0; i < client.getTasksCount(); i++) {
                                             System.out.println((i + 1) + ". " + tasks.get(i));
                                         }
@@ -368,6 +376,7 @@ public class App {
                                         if (opt2 == 0) {
                                             break;
                                         }
+                                        // The code is trying to complete a task.
                                         try {
                                             System.out
                                                     .print("Task \"" + client.completeTask(opt2 - 1) + "\" completed");
@@ -378,7 +387,7 @@ public class App {
                                         }
                                         break;
                                     }
-                                    case 3: { // Account Details
+                                    case 3: { // Account Settings
                                         Utility.clearConsoleScreen();
                                         System.out.println("Client user account");
                                         System.out.println("Username: " + client.getUsername() + "\nBPO Manager: "
@@ -398,7 +407,7 @@ public class App {
                                             sc.next();
                                             break;
                                         }
-                                        switch (opt2) {
+                                        switch (opt2) { // Account settings
                                             case 1: { // Change Password
                                                 Utility.clearConsoleScreen();
                                                 System.out.println("Change Password");
@@ -408,6 +417,10 @@ public class App {
                                                 System.out.print("New Password: ");
                                                 passChar = con.readPassword();
                                                 String newPass = String.valueOf(passChar);
+                                                // Checking if the old password is correct, and if it
+                                                // is, it is checking if the new password is different
+                                                // from the old password. If it is, it is setting the
+                                                // new password.
                                                 if (client.checkPassword(oldPass)) {
                                                     if (client.checkPassword(newPass)) {
                                                         System.out.print(
@@ -425,6 +438,10 @@ public class App {
                                                 break;
                                             }
                                             case 2: { // Delete Account
+                                                // The code is checking if the client has a BPO
+                                                // Manager. If the client has a BPO Manager, the code
+                                                // will print a message to the user and ask the user to
+                                                // press Enter to continue.
                                                 if (client.getBpoManagerUsername() != null) {
                                                     System.out.print(
                                                             "Contract termination required before deleting account.\nAsk current BPO Manager "
@@ -441,6 +458,8 @@ public class App {
                                                 char ans = sc.next().charAt(0);
                                                 Character.toLowerCase(ans);
                                                 int indexToDelete = -1;
+                                                // The code is deleting the user from the list of
+                                                // clients.
                                                 if (ans == 'y') {
                                                     for (int i = 0; i < clients.size(); i++) {
                                                         if (clients.get(i + 1).getUsername()
@@ -450,6 +469,8 @@ public class App {
                                                         }
                                                     }
                                                     try {
+                                                        // Removing the client at the indexToDelete
+                                                        // from the clients array.
                                                         clients.remove(indexToDelete);
                                                         System.out.print("User has been deleted.Exiting application");
                                                         Utility.loadingDots();
@@ -518,11 +539,12 @@ public class App {
                                     break;
                                 }
 
-                                switch (opt2) {
+                                switch (opt2) { // BPO Manager Portal
                                     case 1: { // View your clients
                                         Utility.clearConsoleScreen();
                                         System.out.println("My Clients");
                                         int i = 1;
+                                        // Printing the list of clients.
                                         for (String client : bpoManager.getClients()) {
                                             System.out.println(i + ". " + client);
                                             i++;
@@ -535,6 +557,8 @@ public class App {
                                         Utility.clearConsoleScreen();
                                         System.out.println("Choose from the available client numbers.");
                                         int avlClients = 0;
+                                       // Printing out the clients that do not have a BPO Manager
+                                       // assigned to them.
                                         for (int i = 0; i < clients.size(); i++) {
                                             if (clients.get(i + 1).getBpoManagerUsername() == null) {
                                                 avlClients++;
@@ -563,6 +587,10 @@ public class App {
                                             break;
                                         }
                                         Client currClient = clients.get(clientNo);
+                                        // The code is checking if the client is not null and if
+                                        // the client has no bpo manager assigned to it. If both the
+                                        // conditions are true, then the client is assigned a bpo
+                                        // manager and the bpo manager is assigned a client.
                                         if (currClient != null && currClient.getBpoManagerUsername() == null) {
                                             currClient.setBpoManagerUsername(bpoManager.getUsername());
                                             bpoManager.addClient(currClient.getUsername());
@@ -579,11 +607,15 @@ public class App {
                                         Utility.clearConsoleScreen();
                                         System.out.println("My Clients");
                                         int i = 1;
+                                        // Checking if there are no active client contracts. If there
+                                        // are no active client contracts, it will print a message and
+                                        // break out of the loop.
                                         if (bpoManager.getClientCount() <= 0) {
                                             System.out.print("No active client contracts. Press Enter to continue...");
                                             Utility.getch();
                                             break;
                                         }
+                                        // Printing the list of clients.
                                         for (String client : bpoManager.getClients()) {
                                             System.out.println(i + ". " + client);
                                             i++;
@@ -604,6 +636,8 @@ public class App {
                                             break;
                                         }
                                         Client currClient;
+                                        // The above code is trying to search for a client in the list
+                                        // of clients.
                                         try {
                                             currClient = Client.searchClient(clients,
                                                     bpoManager.getClients().get(clientNo - 1));
@@ -612,6 +646,8 @@ public class App {
                                             Utility.getch();
                                             break;
                                         }
+                                        // The code is removing the client from the BPO manager's
+                                        // list of clients.
                                         if (currClient != null && currClient.getBpoManagerUsername() != null) {
                                             currClient.removeBpoManagerUsername();
                                             bpoManager.removeClient(currClient.getUsername());
@@ -628,6 +664,7 @@ public class App {
                                     case 4: { // Add a task
                                         Utility.clearConsoleScreen();
                                         System.out.println("My Clients.\nChoose a client to add a task.");
+                                        // Checking if there are no active client contracts.
                                         if (bpoManager.getClientCount() <= 0) {
                                             System.out.println(
                                                     "No current active client contracts.\nPress Enter to continue...");
@@ -635,6 +672,7 @@ public class App {
                                             break;
                                         }
                                         int i = 1;
+                                        // Printing the list of clients.
                                         for (String client : bpoManager.getClients()) {
                                             System.out.println(i + ". " + client);
                                             i++;
@@ -655,6 +693,8 @@ public class App {
                                             break;
                                         }
                                         Client currClient;
+                                        // The code is trying to search for a client in the list
+                                        // of clients.
                                         try {
                                             currClient = Client.searchClient(clients,
                                                     bpoManager.getClients().get(clientNo - 1));
@@ -663,6 +703,7 @@ public class App {
                                             Utility.getch();
                                             break;
                                         }
+                                        // The code is adding a task to a client.
                                         if (currClient != null && currClient.getBpoManagerUsername() != null) {
                                             System.out.print("Enter a task description: ");
                                             String taskDesc = sc.nextLine();
@@ -693,6 +734,7 @@ public class App {
                                         int i = 1;
                                         System.out.println(
                                                 "==============================================================");
+                                        // The code is printing the clients and their tasks.
                                         for (String client : bpoManager.getClients()) {
                                             System.out.println(i + ". " + client);
                                             System.out.println(
@@ -714,6 +756,7 @@ public class App {
                                     case 6: { // Account Details
                                         Utility.clearConsoleScreen();
                                         int taskCountTotal = 0;
+                                        // Counting the total number of tasks in the system.
                                         for (String clientUname : bpoManager.getClients()) {
                                             taskCountTotal += Client.searchClient(clients, clientUname).getTasksCount();
                                         }
